@@ -10,7 +10,7 @@
 
 - name: untar the tarball
   sudo: true
-  command: "tar -xf nrpe-{{nagios_nrpe_version}}.tar.gz chdir={{nrpe_build_directory}}"
+  command: "tar -xf nrpe-{{nagios_nrpe_version}}.tar.gz chdir={{nrpe_build_directory}} -C /tmp/"
 
 
 

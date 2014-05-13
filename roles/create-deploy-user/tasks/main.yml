@@ -2,13 +2,13 @@
   user: name={{ deploy }} comment="deploy user" generate_ssh_key=yes state=present password={{ password }} shell=/bin/bash
 
 - name: authorize my SSH key to access {{ deploy }}
-  authorized_key: user={{ deploy }} key="{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+  authorized_key: user={{ deploy }} key="{{ lookup('file', '../files/ideus_rsa.pub') }}"
 
 - name: copy ssh_config so that github doesn't do host verification
   action: copy src=ssh_config dest=~{{ deploy }}/.ssh/config owner={{ deploy }} group={{ deploy }}
 
 - name: add {{ deploy }} to sudoers
-  lineinfile: "dest=/etc/sudoers state=present line='{{ deploy }} ALL=(ALL:ALL) ALL'"
+  lineinfile: "dest=/etc/sudoers state=present line='%{{ deploy }} ALL=(ALL) NOPASSWD: ALL'"
 
 # - name: require password upon each invocation of sudo
 #   lineinfile: "dest=/etc/sudoers state=present line='Defaults timestamp_timeout=0'"

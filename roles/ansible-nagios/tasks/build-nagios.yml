@@ -6,7 +6,7 @@
 
 - name: untar the tarball
   sudo: true
-  command: "tar -xvfz nagios-{{nagios_version}}.tar.gz chdir={{nagios_build_directory}}"
+  command: "tar -xvf nagios-{{nagios_version}}.tar.gz chdir={{nagios_build_directory}} -C /tmp/"
 
 - name: configure
   sudo: true
