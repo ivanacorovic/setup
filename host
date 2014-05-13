@@ -1,0 +1,2 @@
+[webservers]
+nagios-doctor ansible_ssh_host=107.170.129.162

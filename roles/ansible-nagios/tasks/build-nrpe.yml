@@ -1,0 +1,70 @@
+- name: mkdir
+  file: path=/usr/local/src/nrpe
+
+- name: download nagios nrpe tarball
+  sudo: true
+  get_url: >
+    dest={{nrpe_build_directory}}
+    url={{nagios_nrpe_tarball}}
+
+
+- name: untar the tarball
+  sudo: true
+  command: "tar -xf nrpe-{{nagios_nrpe_version}}.tar.gz chdir={{nrpe_build_directory}}"
+
+
+
+- name: libssl-dev depackage
+  sudo: true
+  command: dpkg -L libssl-dev
+
+- name: make all
+  sudo: true
+  command: "make all chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}}"
+
+- name: install nagios nrpe package
+  sudo: true
+  command: "checkinstall --pkgname=nrpe --requires='perl,libc6' --default chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}}"
+
+- name: link libssl
+  file: src=/usr/lib/x86_64-linux-gnu/libssl.so dest=usr/lib/libssl.so
+
+- name: configure
+  sudo: true
+  command: "./configure --with-ssl=/usr/bin/openssl --with-ssl-lib=/usr/lib/x86_64-linux-gnu /usr/local/src/nrpe chdir={{nrpe_build_directory}}/nrpe-{{nagios_nrpe_version}}"
+
+- name: make all
+  sudo: true
+  command: "make all chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}}"
+
+- name: make install
+  sudo: true
+  command: "make install chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}} "
+
+- name: make install daemon
+  sudo: true
+  command: "make install-daemon chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}} "
+
+- name: make install-xinetd
+  sudo: true
+  command: "make install-xinetd chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}} "
+
+- name: chmod  nagios:nagios /usr/local/nagios
+  sudo: true
+  file: path=/usr/local/nagios owner=nagios group=nagios
+
+- name: chown nagios.nagios /usr/local/nagios/libexec
+  sudo: true
+  file: path=/usr/local/nagios/libexec owner=nagios group=nagios recurse=true
+
+- name: command
+  command: "/usr/local/nagios/bin/nrpe -c /usr/local/nagios/etc/nrpe.cfg -d"
+
+- name: add IP address of our server
+  lineinfile: dest=/etc/xinetd.d/nrpe regexp='^only_from       = 127\.0\.0\.1' line='only_from       = 127\.0\.0\.1 {{nagios_host}}'  
+
+- name:   add iptable
+  sudo: true
+  command: "iptables -A INPUT -s {{nagios_host}} -p tcp --dport 5666 -j ACCEPT"
+
+
