@@ -1,3 +1,7 @@
+- name: make some directory (test)
+  sudo: true
+  file: path=/testf state=directory
+
 # Update and install dependent packages.
 - name: install nagios' dependent packages
   sudo: true

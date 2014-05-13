@@ -1,5 +1,6 @@
-- name: mkdir
-  file: path=/usr/local/src/nrpe
+- name: make nrpe src
+  sudo: true
+  file: path=/usr/local/src/nrpe state=directory
 
 - name: download nagios nrpe tarball
   sudo: true
@@ -7,27 +8,17 @@
     dest={{nrpe_build_directory}}
     url={{nagios_nrpe_tarball}}
 
-
 - name: untar the tarball
   sudo: true
-  command: "tar -xf nrpe-{{nagios_nrpe_version}}.tar.gz chdir={{nrpe_build_directory}} -C /tmp/"
-
-
+  command: "tar -xvf /tmp/nrpe-{{nagios_nrpe_version}}.tar.gz -C /tmp/"
 
 - name: libssl-dev depackage
   sudo: true
   command: dpkg -L libssl-dev
 
-- name: make all
+- name: link libssl.so
   sudo: true
-  command: "make all chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}}"
-
-- name: install nagios nrpe package
-  sudo: true
-  command: "checkinstall --pkgname=nrpe --requires='perl,libc6' --default chdir={{nagios_build_directory}}/nrpe-{{nagios_nrpe_version}}"
-
-- name: link libssl
-  file: src=/usr/lib/x86_64-linux-gnu/libssl.so dest=usr/lib/libssl.so
+  file: src=/usr/lib/x86_64-linux-gnu/libssl.so dest=/usr/lib/libssl.so state=link
 
 - name: configure
   sudo: true
@@ -58,13 +49,13 @@
   file: path=/usr/local/nagios/libexec owner=nagios group=nagios recurse=true
 
 - name: command
+  sudo: true
   command: "/usr/local/nagios/bin/nrpe -c /usr/local/nagios/etc/nrpe.cfg -d"
 
 - name: add IP address of our server
-  lineinfile: dest=/etc/xinetd.d/nrpe regexp='^only_from       = 127\.0\.0\.1' line='only_from       = 127\.0\.0\.1 {{nagios_host}}'  
+  sudo: true
+  lineinfile: dest=/etc/xinetd.d/nrpe regexp='^only_from       = 127\.0\.0\.1' line='only_from       = 127\.0\.0\.1 {{nagios_host}}' 
 
 - name:   add iptable
   sudo: true
   command: "iptables -A INPUT -s {{nagios_host}} -p tcp --dport 5666 -j ACCEPT"
-
-

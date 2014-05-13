@@ -6,7 +6,7 @@
 
 - name: untar the tarball
   sudo: true
-  command: "tar -xvf nagios-{{nagios_version}}.tar.gz chdir={{nagios_build_directory}} -C /tmp/"
+  command: "tar -xvf /tmp/nagios-{{nagios_version}}.tar.gz -C /tmp/"
 
 - name: configure
   sudo: true
@@ -16,39 +16,37 @@
   sudo: true
   command: "make all chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
-- name: install nagios package
+- name: make
   sudo: true
-  command: "checkinstall --pkgname=nagios4 --requires='perl,libc6' --default make install chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
+  command: "make install chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
-- name: install nagios package
+- name: make
   sudo: true
-  command: "checkinstall --pkgname=nagios4 --requires='perl,libc6' --default make install-init chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
+  command: "make install-init chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
-- name: install sample config files
+- name: make
   sudo: true
-  command: "checkinstall --pkgname=nagios-config --requires='perl,libc6' --default make install-config chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
+  command: "make install-config chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
-- name: configure external command permissions
+- name: make
   sudo: true
-  command: "checkinstall --pkgname=nagios-commandmode --requires='perl,libc6' --default make install-commandmode chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
-
-- name: install apache config files
-  sudo: true
-  command: "checkinstall --pkgname=nagios-webconf --requires='perl,libc6' --default make install-webconf chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
+  command: "make install-webconf chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
 - name: copy eventhandlers
   sudo: true
-  command: cp -R contrib/eventhandlers/ /usr/local/nagios/libexec/
+  command: "cp -R contrib/eventhandlers/ /usr/local/nagios/libexec/ chdir={{nagios_build_directory}}/nagios-{{nagios_version}}"
 
 - name: change owner for eventhandlers
   sudo: true
   file: path=/usr/local/nagios/libexec/eventhandlers owner=nagios group=nagios recurse=true mode=0644
 
 - name: add a htpasswd user for nagios
+  sudo: true
   command: >
     htpasswd -b -c /usr/local/nagios/etc/passwd {{ nagios_user }} {{ nagios_password }}
  
 - name: htpasswd file permission
+  sudo: true
   file: >
     path=/usr/local/nagios/etc/passwd
     owner=nagios

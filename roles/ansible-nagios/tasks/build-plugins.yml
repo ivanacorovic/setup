@@ -6,7 +6,8 @@
 
 - name: untar the tarball
   sudo: true
-  command: "tar -xvfz nagios-plugins-{{nagios_plugins_version}}.tar.gz chdir={{nagios_build_directory}} -C /tmp/"
+  command: "tar -xvf /tmp/nagios-plugins-{{nagios_plugins_version}}.tar.gz -C /tmp/"
+
 
 - name: configure
   sudo: true
@@ -16,9 +17,9 @@
   sudo: true
   command: "make all chdir={{nagios_build_directory}}/nagios-plugins-{{nagios_plugins_version}}"
 
-- name: install nagios plugins package
+- name: make
   sudo: true
-  command: "checkinstall --pkgname=nagios-plugins --requires='perl,libc6' --default make install chdir={{nagios_build_directory}}/nagios-plugins-{{nagios_plugins_version}}"
+  command: "make install chdir={{nagios_build_directory}}/nagios-plugins-{{nagios_plugins_version}}"
 
 - name: link sites-available/nagis to sites-enabled/nagios
   sudo: true
